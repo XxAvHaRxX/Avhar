@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Королевства Вечности</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #8B4513;
+            --secondary: #D4AF37;
+            --light: #F5F5DC;
+            --dark: #2c3e50;
+            --success: #28a745;
+            --danger: #dc3545;
+            --info: #17a2b8;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'MedievalSharp', cursive;
+        }
+        
+        body {
+            background: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--light);
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Шапка игры */
+        .game-header {
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid var(--secondary);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+        
+        .player-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .player-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #8b4513, #a0522d);
+            border: 3px solid var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        
+        .player-stats {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .player-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--secondary);
+            margin-bottom: 5px;
+        }
+        
+        .player-level {
+            font-size: 16px;
+            color: var(--light);
+        }
+        
+        /* Ресурсы */
+        .resources {
+            display: flex;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+            padding: 10px 20px;
+            flex-wrap: wrap;
+        }
+        
+        .resource {
+            display: flex;
+            align-items: center;
+            margin: 0 10px;
+        }
+        
+        .resource-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--secondary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+            font-weight: bold;
+            color: var(--dark);
+        }
+        
+        .resource-value {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        /* Навигация */
+        .game-nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            padding: 10px;
+            border: 2px solid var(--primary);
+        }
+        
+        .nav-btn {
+            background: var(--primary);
+            color: var(--light);
+            border: none;
+            padding: 10px 20px;
+            margin: 0 5px;
+            border-radius: 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+        
+        .nav-btn:hover, .nav-btn.active {
+            background: var(--secondary);
+            color: var(--dark);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Основной контент */
+        .game-content {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+            min-height: 500px;
+            border: 3px solid var(--secondary);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Город */
+        .city-title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--secondary);
+            font-size: 28px;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+        
+        .city-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+        
+        .tile {
+            background: linear-gradient(135deg, #3a5f0b, #2c4a07);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            aspect-ratio: 1/1;
+        }
+        
+        .tile:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .tile.empty::before {
+            content: "+";
+            font-size: 48px;
+            color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .building {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+        
+        .building-icon {
+            font-size: 36px;
+            margin-bottom: 5px;
+            color: var(--secondary);
+        }
+        
+        .building-name {
+            font-size: 14px;
+            text-align: center;
+            font-weight: bold;
+            color: var(--light);
+            background: rgba(0, 0, 0, 0.6);
+            padding: 2px 8px;
+            border-radius: 10px;
+            width: 100%;
+        }
+        
+        .building-level {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: var(--secondary);
+            color: var(--dark);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        /* Карты */
+        .battle-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .battle-field {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin: 20px 0;
+            min-height: 200px;
+            background: rgba(43, 34, 23, 0.6);
+            border-radius: 10px;
+            padding: 20px;
+            border: 2px solid var(--primary);
+        }
+        
+        .player-side, .opponent-side {
+            width: 45%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .battle-row {
+            display: flex;
+            justify-content: space-around;
+            margin: 10px 0;
+            min-height: 80px;
+        }
+        
+        .card-slot {
+            width: 70px;
+            height: 70px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px dashed var(--secondary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .card {
+            width: 100px;
+            height: 140px;
+            background: linear-gradient(135deg, #8B4513, #654321);
+            border: 2px solid var(--secondary);
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            margin: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+        
+        .card-name {
+            font-weight: bold;
+            color: var(--secondary);
+        }
+        
+        .card-cost {
+            background: var(--secondary);
+            color: var(--dark);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .card-art {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin: 5px 0;
+        }
+        
+        .card-stats {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .card-stat {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+        
+        .card-ability {
+            font-size: 10px;
+            text-align: center;
+            margin-top: 5px;
+            color: var(--secondary);
+        }
+        
+        .hand {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            min-height: 160px;
+        }
+        
+        /* Настройки */
+        .settings-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .settings-section {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid var(--primary);
+        }
+        
+        .settings-title {
+            color: var(--secondary);
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .language-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .lang-btn {
+            background: var(--primary);
+            color: var(--light);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .lang-btn.active {
+            background: var(--secondary);
+            color: var(--dark);
+            font-weight: bold;
+        }
+        
+        /* Кнопка */
+        .btn {
+            background: linear-gradient(135deg, var(--secondary), #b8860b);
+            color: var(--dark);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 15px auto;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn:hover {
+            background: linear-gradient(135deg, #e5c158, var(--secondary));
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .game-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .resources {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .city-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .card {
+                width: 80px;
+                height: 112px;
+                font-size: 12px;
+            }
+            
+            .card-stat {
+                font-size: 12px;
+                padding: 2px 5px;
+            }
+        }
+        
+        /* Стили для китайского языка */
+        .chinese-font {
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Шапка игры -->
+        <div class="game-header">
+            <div class="player-info">
+                <div class="player-avatar" id="player-avatar">И</div>
+                <div class="player-stats">
+                    <div class="player-name" id="player-name">Игрок</div>
+                    <div class="player-level">Замок: Уровень <span id="castle-level">1</span></div>
+                </div>
+            </div>
+            
+            <div class="resources">
+                <div class="resource">
+                    <div class="resource-icon">G</div>
+                    <div class="resource-value" id="gold-value">500</div>
+                </div>
+                <div class="resource">
+                    <div class="resource-icon">W</div>
+                    <div class="resource-value" id="wood-value">300</div>
+                </div>
+                <div class="resource">
+                    <div class="resource-icon">S</div>
+                    <div class="resource-value" id="stone-value">200</div>
+                </div>
+                <div class="resource">
+                    <div class="resource-icon">F</div>
+                    <div class="resource-value" id="food-value">400</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Навигация -->
+        <div class="game-nav">
+            <button class="nav-btn active" data-tab="city">Город</button>
+            <button class="nav-btn" data-tab="battle">Битва</button>
+            <button class="nav-btn" data-tab="campaign">Кампания</button>
+            <button class="nav-btn" data-tab="settings">Настройки</button>
+        </div>
+        
+        <!-- Основной контент -->
+        <div class="game-content">
+            <!-- Город -->
+            <div class="tab-content active" id="city-tab">
+                <h2 class="city-title">Ваше Королевство</h2>
+                <div class="city-grid" id="city-grid">
+                    <!-- Здания будут добавляться через JavaScript -->
+                </div>
+                <button class="btn" id="collect-btn">Собрать ресурсы</button>
+            </div>
+            
+            <!-- Битва -->
+            <div class="tab-content" id="battle-tab">
+                <h2 class="city-title">Арена Битв</h2>
+                <div class="battle-container">
+                    <div class="battle-field">
+                        <div class="opponent-side">
+                            <h3>Противник</h3>
+                            <div class="battle-row" id="opponent-row">
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                            </div>
+                        </div>
+                        <div class="player-side">
+                            <h3>Ваши войска</h3>
+                            <div class="battle-row" id="player-row">
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="hand" id="player-hand">
+                        <!-- Карты игрока -->
+                    </div>
+                    
+                    <button class="btn" id="attack-btn">Атаковать</button>
+                </div>
+            </div>
+            
+            <!-- Настройки -->
+            <div class="tab-content" id="settings-tab">
+                <h2 class="city-title">Настройки Королевства</h2>
+                <div class="settings-container">
+                    <div class="settings-section">
+                        <h3 class="settings-title">Язык</h3>
+                        <div class="language-selector">
+                            <button class="lang-btn active" data-lang="ru">Русский</button>
+                            <button class="lang-btn" data-lang="en">English</button>
+                            <button class="lang-btn" data-lang="cn">中文</button>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-section">
+                        <h3 class="settings-title">Учетная запись</h3>
+                        <p id="account-info">Войдите через Telegram для сохранения прогресса</p>
+                        <button class="btn" id="telegram-login">Войти через Telegram</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Инициализация Telegram WebApp
+        const tg = window.Telegram?.WebApp;
+        
+        // Игровые данные
+        const gameState = {
+            language: 'ru',
+            faction: null,
+            race: null,
+            castleLevel: 1,
+            resources: {
+                gold: 500,
+                wood: 300,
+                stone: 200,
+                food: 400
+            },
+            buildings: [
+                { type: 'castle', level: 1, position: 0 },
+                { type: 'farm', level: 1, position: 1 },
+                { type: 'lumbermill', level: 1, position: 2 },
+                { type: 'barracks', level: 1, position: 4 }
+            ],
+            cards: [
+                { id: 1, name: 'Эльфийский Лучник', type: 'unit', cost: 2, attack: 3, health: 2, ability: 'Раненый: +1 к атаке', race: 'elves' },
+                { id: 2, name: 'Орк Воин', type: 'unit', cost: 3, attack: 4, health: 3, ability: 'Ярость: +1 к атаке при получении урона', race: 'orcs' },
+                { id: 3, name: 'Дварфский Щитоносец', type: 'unit', cost: 2, attack: 2, health: 4, ability: 'Защита: +1 к здоровью', race: 'dwarves' },
+                { id: 4, name: 'Исцеляющее Зелье', type: 'spell', cost: 1, effect: 'Восстанавливает 3 здоровья союзнику', race: 'all' },
+                { id: 5, name: 'Огненный Шар', type: 'spell', cost: 3, effect: 'Наносит 5 урона противнику', race: 'all' }
+            ],
+            battleHand: [1, 2, 3, 4, 5]
+        };
+        
+        // Переводы для многоязычной поддержки
+        const translations = {
+            ru: {
+                city: "Город",
+                battle: "Битва",
+                campaign: "Кампания",
+                settings: "Настройки",
+                playerName: "Игрок",
+                collectResources: "Собрать ресурсы",
+                attack: "Атаковать",
+                language: "Язык",
+                account: "Учетная запись",
+                loginTelegram: "Войти через Telegram",
+                accountInfo: "Войдите через Telegram для сохранения прогресса",
+                buildingNames: {
+                    castle: "Замок",
+                    farm: "Ферма",
+                    lumbermill: "Лесопилка",
+                    quarry: "Каменоломня",
+                    barracks: "Казармы",
+                    mageTower: "Башня Мага",
+                    alchemyLab: "Алхимическая Лаборатория"
+                }
+            },
+            en: {
+                city: "City",
+                battle: "Battle",
+                campaign: "Campaign",
+                settings: "Settings",
+                playerName: "Player",
+                collectResources: "Collect Resources",
+                attack: "Attack",
+                language: "Language",
+                account: "Account",
+                loginTelegram: "Login with Telegram",
+                accountInfo: "Login with Telegram to save your progress",
+                buildingNames: {
+                    castle: "Castle",
+                    farm: "Farm",
+                    lumbermill: "Lumbermill",
+                    quarry: "Quarry",
+                    barracks: "Barracks",
+                    mageTower: "Mage Tower",
+                    alchemyLab: "Alchemy Lab"
+                }
+            },
+            cn: {
+                city: "城市",
+                battle: "战斗",
+                campaign: "战役",
+                settings: "设置",
+                playerName: "玩家",
+                collectResources: "收集资源",
+                attack: "攻击",
+                language: "语言",
+                account: "账户",
+                loginTelegram: "通过Telegram登录",
+                accountInfo: "通过Telegram登录以保存进度",
+                buildingNames: {
+                    castle: "城堡",
+                    farm: "农场",
+                    lumbermill: "锯木厂",
+                    quarry: "采石场",
+                    barracks: "兵营",
+                    mageTower: "法师塔",
+                    alchemyLab: "炼金实验室"
+                }
+            }
+        };
+        
+        // Информация о зданиях
+        const buildingInfo = {
+            castle: {
+                name: translations.ru.buildingNames.castle,
+                icon: '🏰',
+                production: 'Центр вашего королевства'
+            },
+            farm: {
+                name: translations.ru.buildingNames.farm,
+                icon: '🌾',
+                production: '+10 еды/час'
+            },
+            lumbermill: {
+                name: translations.ru.buildingNames.lumbermill,
+                icon: '🌲',
+                production: '+5 дерева/час'
+            },
+            quarry: {
+                name: translations.ru.buildingNames.quarry,
+                icon: '⛏️',
+                production: '+5 камня/час'
+            },
+            barracks: {
+                name: translations.ru.buildingNames.barracks,
+                icon: '⚔️',
+                production: 'Тренирует войска'
+            },
+            mageTower: {
+                name: translations.ru.buildingNames.mageTower,
+                icon: '🔮',
+                production: 'Исследования и магия'
+            },
+            alchemyLab: {
+                name: translations.ru.buildingNames.alchemyLab,
+                icon: '🧪',
+                production: 'Создание зелий'
+            }
+        };
+        
+        // Инициализация игры
+        function initGame() {
+            setupEventListeners();
+            renderResources();
+            renderCity();
+            renderBattleHand();
+            updateLanguageUI();
+            
+            // Если игра открыта в Telegram, инициализируем WebApp
+            if (tg) {
+                tg.ready();
+                tg.expand();
+                
+                const user = tg.initDataUnsafe?.user;
+                if (user) {
+                    document.getElementById('player-name').textContent = user.first_name || translations[gameState.language].playerName;
+                    document.getElementById('player-avatar').textContent = user.first_name ? user.first_name[0] : 'И';
+                    document.getElementById('telegram-login').style.display = 'none';
+                    document.getElementById('account-info').textContent = `Вы вошли как ${user.first_name || 'пользователь Telegram'}`;
+                }
+            }
+        }
+        
+        // Отображение ресурсов
+        function renderResources() {
+            document.getElementById('gold-value').textContent = gameState.resources.gold;
+            document.getElementById('wood-value').textContent = gameState.resources.wood;
+            document.getElementById('stone-value').textContent = gameState.resources.stone;
+            document.getElementById('food-value').textContent = gameState.resources.food;
+            document.getElementById('castle-level').textContent = gameState.castleLevel;
+        }
+        
+        // Отображение города
+        function renderCity() {
+            const cityGrid = document.getElementById('city-grid');
+            cityGrid.innerHTML = '';
+            
+            for (let i = 0; i < 16; i++) {
+                const tile = document.createElement('div');
+                tile.className = 'tile';
+                tile.dataset.index = i;
+                
+                // Проверяем, есть ли здание на этой позиции
+                const building = gameState.buildings.find(b => b.position === i);
+                
+                if (building) {
+                    const info = buildingInfo[building.type];
+                    tile.innerHTML = `
+                        <div class="building">
+                            <div class="building-icon">${info.icon}</div>
+                            <div class="building-name">${translations[gameState.language].buildingNames[building.type]}</div>
+                            <div class="building-level">${building.level}</div>
+                        </div>
+                    `;
+                } else {
+                    tile.classList.add('empty');
+                }
+                
+                cityGrid.appendChild(tile);
+            }
+        }
+        
+        // Отображение карт в руке
+        function renderBattleHand() {
+            const playerHand = document.getElementById('player-hand');
+            playerHand.innerHTML = '';
+            
+            gameState.battleHand.forEach(cardId => {
+                const cardData = gameState.cards.find(c => c.id === cardId);
+                if (cardData) {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.dataset.cardId = cardData.id;
+                    
+                    card.innerHTML = `
+                        <div class="card-header">
+                            <div class="card-name">${cardData.name}</div>
+                            <div class="card-cost">${cardData.cost}</div>
+                        </div>
+                        <div class="card-art">${getRaceIcon(cardData.race)}</div>
+                        <div class="card-stats">
+                            ${cardData.type === 'unit' ? `
+                                <div class="card-stat">⚔️ ${cardData.attack}</div>
+                                <div class="card-stat">❤️ ${cardData.health}</div>
+                            ` : `<div class="card-stat">🔮 Заклинание</div>`}
+                        </div>
+                        <div class="card-ability">${cardData.ability || cardData.effect}</div>
+                    `;
+                    
+                    playerHand.appendChild(card);
+                }
+            });
+        }
+        
+        // Получение иконки расы
+        function getRaceIcon(race) {
+            const raceIcons = {
+                elves: '🧝',
+                orcs: '👹',
+                dwarves: '🧔',
+                humans: '👨',
+                undead: '💀',
+                demons: '😈'
+            };
+            return raceIcons[race] || '🃏';
+        }
+        
+        // Обновление интерфейса при смене языка
+        function updateLanguageUI() {
+            const lang = gameState.language;
+            const t = translations[lang];
+            
+            // Обновление навигации
+            document.querySelector('[data-tab="city"]').textContent = t.city;
+            document.querySelector('[data-tab="battle"]').textContent = t.battle;
+            document.querySelector('[data-tab="campaign"]').textContent = t.campaign;
+            document.querySelector('[data-tab="settings"]').textContent = t.settings;
+            
+            // Обновление кнопок
+            document.getElementById('collect-btn').textContent = t.collectResources;
+            document.getElementById('attack-btn').textContent = t.attack;
+            document.getElementById('telegram-login').textContent = t.loginTelegram;
+            
+            // Обновление текста
+            document.querySelector('.settings-title').textContent = t.language;
+            document.getElementById('account-info').textContent = t.accountInfo;
+            document.querySelectorAll('.settings-title')[1].textContent = t.account;
+            
+            // Обновление названий зданий
+            renderCity();
+        }
+        
+        // Настройка обработчиков событий
+        function setupEventListeners() {
+            // Навигация
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+                    
+                    btn.classList.add('active');
+                    document.getElementById(`${btn.dataset.tab}-tab`).classList.add('active');
+                });
+            });
+            
+            // Сбор ресурсов
+            document.getElementById('collect-btn').addEventListener('click', () => {
+                gameState.resources.food += 50;
+                gameState.resources.wood += 30;
+                gameState.resources.stone += 20;
+                renderResources();
+                showNotification('Ресурсы собраны!');
+            });
+            
+            // Атака
+            document.getElementById('attack-btn').addEventListener('click', () => {
+                showNotification('Атака началась!');
+                // Здесь будет логика атаки
+            });
+            
+            // Выбор языка
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    gameState.language = btn.dataset.lang;
+                    
+                    // Добавление/удаление класса для китайского шрифта
+                    if (gameState.language === 'cn') {
+                        document.body.classList.add('chinese-font');
+                    } else {
+                        document.body.classList.remove('chinese-font');
+                    }
+                    
+                    updateLanguageUI();
+                });
+            });
+            
+            // Вход через Telegram
+            document.getElementById('telegram-login').addEventListener('click', () => {
+                if (tg) {
+                    tg.showPopup({
+                        title: 'Вход через Telegram',
+                        message: 'Вы хотите войти в игру с помощью Telegram?',
+                        buttons: [
+                            {id: 'login', type: 'ok', text: 'Войти'},
+                            {type: 'cancel'}
+                        ]
+                    }, (buttonId) => {
+                        if (buttonId === 'login') {
+                            // В реальном приложении здесь была бы аутентификация
+                            document.getElementById('telegram-login').style.display = 'none';
+                            document.getElementById('account-info').textContent = 'Вы вошли через Telegram';
+                            showNotification('Вы успешно вошли!');
+                        }
+                    });
+                } else {
+                    showNotification('Откройте игру в Telegram для входа');
+                }
+            });
+            
+            // Перетаскивание карт
+            document.querySelectorAll('.card').forEach(card => {
+                card.addEventListener('dragstart', handleDragStart);
+            });
+            
+            document.querySelectorAll('.card-slot').forEach(slot => {
+                slot.addEventListener('dragover', handleDragOver);
+                slot.addEventListener('drop', handleDrop);
+                slot.addEventListener('dragenter', handleDragEnter);
+                slot.addEventListener('dragleave', handleDragLeave);
+            });
+        }
+        
+        // Уведомления
+        function showNotification(message) {
+            if (tg && tg.showAlert) {
+                tg.showAlert(message);
+            } else {
+                alert(message);
+            }
+        }
+        
+        // Drag and Drop для карт
+        let draggedCard = null;
+        
+        function handleDragStart(e) {
+            draggedCard = this;
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
+            this.classList.add('dragging');
+        }
+        
+        function handleDragOver(e) {
+            e.preventDefault();
+            return false;
+        }
+        
+        function handleDragEnter(e) {
+            this.classList.add('over');
+        }
+        
+        function handleDragLeave(e) {
+            this.classList.remove('over');
+        }
+        
+        function handleDrop(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            
+            if (draggedCard !== null) {
+                this.classList.remove('over');
+                
+                // Проверяем, есть ли уже карта в слоте
+                if (this.children.length > 0) {
+                    showNotification('Слот занят!');
+                    return;
+                }
+                
+                // Добавляем карту в слот
+                const cardClone = draggedCard.cloneNode(true);
+                cardClone.classList.remove('dragging');
+                cardClone.draggable = false;
+                this.appendChild(cardClone);
+                
+                // Удаляем оригинал из руки
+                draggedCard.remove();
+                
+                // Сбрасываем состояние
+                draggedCard = null;
+            }
+            return false;
+        }
+        
+        // Запуск игры при загрузке страницы
+        window.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>
