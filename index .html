@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no">
+    <title>Наруто: Путь Шиноби - Telegram Mini App</title>
+    
+    <!-- Подключаем Telegram Web App SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --tg-theme-bg-color: #1a202c;
+            --tg-theme-text-color: #e2e8f0;
+            --tg-theme-hint-color: #a0aec0;
+            --tg-theme-link-color: #4299e1;
+            --tg-theme-button-color: #4299e1;
+            --tg-theme-button-text-color: #ffffff;
+            --tg-theme-secondary-bg-color: #2d3748;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            background-color: var(--tg-theme-secondary-bg-color);
+            border-radius: 1rem;
+            padding: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-width: 100%;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+        
+        h1, h2 {
+            color: var(--tg-theme-link-color);
+            font-weight: 700;
+            text-align: center;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--tg-theme-hint-color);
+        }
+        
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid #4a5568;
+            background-color: #4a5568;
+            color: var(--tg-theme-text-color);
+            margin-bottom: 1rem;
+        }
+        
+        button {
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            padding: 0.6rem 1rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-weight: 600;
+            width: 100%;
+            font-size: 0.95rem;
+        }
+        
+        button:hover {
+            opacity: 0.9;
+        }
+        
+        button:disabled {
+            background-color: #a0aec0;
+            cursor: not-allowed;
+        }
+        
+        .message-box {
+            background-color: #2c5282;
+            color: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            text-align: center;
+        }
+        
+        .stat-input-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .stat-input-group label {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        .stat-input-group input {
+            width: 60px;
+            margin-bottom: 0;
+            text-align: center;
+        }
+        
+        .stat-controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-left: 1rem;
+        }
+        
+        .stat-controls button {
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+        
+        .game-section {
+            border-top: 1px solid #4a5568;
+            padding-top: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .game-output {
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            min-height: 120px;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .combat-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        /* Telegram Header Styles */
+        .tg-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background-color: var(--tg-theme-secondary-bg-color);
+            border-bottom: 1px solid #4a5568;
+        }
+        
+        .tg-back-button {
+            background: none;
+            border: none;
+            color: var(--tg-theme-link-color);
+            font-size: 1rem;
+            cursor: pointer;
+            width: auto;
+            padding: 0;
+        }
+        
+        /* Responsive Adaptations */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0.75rem;
+                border-radius: 0;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            h2 {
+                font-size: 1.25rem;
+            }
+            
+            .game-output {
+                min-height: 100px;
+                max-height: 150px;
+                font-size: 0.85rem;
+            }
+            
+            button {
+                padding: 0.5rem;
+                font-size: 0.9rem;
+            }
+            
+            .combat-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Telegram Mini Apps Header -->
+    <div class="tg-header">
+        <button id="tgBackButton" class="tg-back-button">← Назад</button>
+        <h1>Наруто: Путь Шиноби</h1>
+        <button id="tgSaveButton" style="background: none; border: none; color: #4299e1; width: auto;">💾</button>
+    </div>
+
+    <div class="container">
+        <!-- Character Creation Section -->
+        <div id="characterCreation" class="game-section">
+            <h2 class="text-2xl mb-4">Создание Персонажа</h2>
+            <form id="characterForm">
+                <label for="charName">Имя персонажа:</label>
+                <input type="text" id="charName" placeholder="Введите имя" required class="mb-4">
+
+                <label for="charVillage">Выбери деревню:</label>
+                <select id="charVillage" class="mb-4">
+                    <option value="Конохагакуре">Конохагакуре (Скрытый Лист)</option>
+                    <option value="Кумогакуре">Кумогакуре (Скрытое Облако)</option>
+                    <option value="Киригакуре">Киригакуре (Скрытый Туман)</option>
+                    <option value="Ивагакуре">Ивагакуре (Скрытый Камень)</option>
+                    <option value="Сунагакуре">Сунагакуре (Скрытый Песок)</option>
+                </select>
+
+                <label for="charChakraElement">Выбери стихию чакры:</label>
+                <select id="charChakraElement" class="mb-4">
+                    <option value="Ветер">Ветер (Футон)</option>
+                    <option value="Молния">Молния (Райтон)</option>
+                    <option value="Вода">Вода (Суйтон)</option>
+                    <option value="Огонь">Огонь (Катон)</option>
+                    <option value="Земля">Земля (Дотон)</option>
+                </select>
+
+                <h3 class="text-xl mb-2 text-center text-blue-300">Распредели 10 очков характеристик:</h3>
+                <p id="remainingPoints" class="text-center text-lg mb-4 text-yellow-300">Осталось очков: 10</p>
+
+                <div class="stat-input-group">
+                    <label for="statStrength">Сила:</label>
+                    <input type="number" id="statStrength" value="0" min="0" max="10" readonly>
+                    <div class="stat-controls">
+                        <button type="button" class="add-stat-btn" data-stat="Strength">+</button>
+                        <button type="button" class="remove-stat-btn" data-stat="Strength">-</button>
+                    </div>
+                </div>
+                <div class="stat-input-group">
+                    <label for="statAgility">Ловкость:</label>
+                    <input type="number" id="statAgility" value="0" min="0" max="10" readonly>
+                    <div class="stat-controls">
+                        <button type="button" class="add-stat-btn" data-stat="Agility">+</button>
+                        <button type="button" class="remove-stat-btn" data-stat="Agility">-</button>
+                    </div>
+                </div>
+                <div class="stat-input-group">
+                    <label for="statStamina">Выносливость:</label>
+                    <input type="number" id="statStamina" value="0" min="0" max="10" readonly>
+                    <div class="stat-controls">
+                        <button type="button" class="add-stat-btn" data-stat="Stamina">+</button>
+                        <button type="button" class="remove-stat-btn" data-stat="Stamina">-</button>
+                    </div>
+                </div>
+                <div class="stat-input-group">
+                    <label for="statChakra">Чакра:</label>
+                    <input type="number" id="statChakra" value="0" min="0" max="10" readonly>
+                    <div class="stat-controls">
+                        <button type="button" class="add-stat-btn" data-stat="Chakra">+</button>
+                        <button type="button" class="remove-stat-btn" data-stat="Chakra">-</button>
+                    </div>
+                </div>
+                <div class="stat-input-group">
+                    <label for="statIntellect">Интеллект:</label>
+                    <input type="number" id="statIntellect" value="0" min="0" max="10" readonly>
+                    <div class="stat-controls">
+                        <button type="button" class="add-stat-btn" data-stat="Intellect">+</button>
+                        <button type="button" class="remove-stat-btn" data-stat="Intellect">-</button>
+                    </div>
+                </div>
+
+                <label for="charAppearance" class="mt-4">Краткое описание внешности (опционально):</label>
+                <input type="text" id="charAppearance" placeholder="Например: 'Молодой ниндзя с растрепанными черными волосами...'">
+
+                <button type="submit" id="createCharBtn" class="mt-6">Создать Персонажа</button>
+            </form>
+            <div id="messageBox" class="message-box hidden"></div>
+        </div>
+
+        <!-- Game Interface Section -->
+        <div id="gameInterface" class="game-section hidden">
+            <h2 class="text-2xl mb-4">Мир Шиноби</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <button id="showProfileBtn">Показать Профиль</button>
+                <button id="showMissionsBtn">Миссии</button>
+                <button id="showInventoryBtn">Инвентарь</button>
+                <button id="showTrainingBtn">Обучение</button>
+            </div>
+
+            <!-- Game Output Area -->
+            <div id="gameOutput" class="game-output">
+                Добро пожаловать в мир Наруто: Путь Шиноби!
+            </div>
+
+            <!-- Profile Display -->
+            <div id="profileDisplay" class="hidden">
+                <h3 class="text-xl mb-2 text-blue-300">Профиль Персонажа</h3>
+                <p><strong>Имя:</strong> <span id="profileName"></span></p>
+                <p><strong>Деревня:</strong> <span id="profileVillage"></span></p>
+                <p><strong>Стихия Чакры:</strong> <span id="profileElement"></span></p>
+                <p><strong>Уровень:</strong> <span id="profileLevel"></span></p>
+                <p><strong>Опыт:</strong> <span id="profileExp"></span> / <span id="profileExpToNextLevel"></span></p>
+                <p><strong>Здоровье (HP):</strong> <span id="profileHP"></span> / <span id="profileMaxHP"></span></p>
+                <p><strong>Чакра (CP):</strong> <span id="profileCP"></span> / <span id="profileMaxCP"></span></p>
+                <p><strong>Характеристики:</strong></p>
+                <ul>
+                    <li>Сила: <span id="profileStrength"></span></li>
+                    <li>Ловкость: <span id="profileAgility"></span></li>
+                    <li>Выносливость: <span id="profileStamina"></span></li>
+                    <li>Чакра: <span id="profileChakra"></span></li>
+                    <li>Интеллект: <span id="profileIntellect"></span></li>
+                </ul>
+                <p><strong>Внешность:</strong> <span id="profileAppearance"></span></p>
+                <h4 class="text-lg mt-2 text-blue-200">Дзюцу:</h4>
+                <ul id="profileJutsuList"></ul>
+                <h4 class="text-lg mt-2 text-blue-200">Экипировка:</h4>
+                <ul id="profileEquipmentList"></ul>
+            </div>
+
+            <!-- Missions Display -->
+            <div id="missionsDisplay" class="hidden">
+                <h3 class="text-xl mb-2 text-blue-300">Доступные Миссии</h3>
+                <ul id="missionList" class="mb-4">
+                    <!-- Missions will be dynamically loaded here -->
+                </ul>
+                <button id="takeMissionBtn" class="mb-2">Взять Миссию</button>
+                <button id="completeMissionBtn" class="mb-2 hidden">Сдать Миссию</button>
+                <div id="missionMessageBox" class="message-box hidden"></div>
+            </div>
+
+            <!-- Combat Display -->
+            <div id="combatDisplay" class="hidden">
+                <h3 class="text-xl mb-2 text-red-300">Бой!</h3>
+                <div id="combatLog" class="game-output mb-4"></div>
+                <p>Твое HP: <span id="playerCombatHP"></span> / <span id="playerCombatMaxHP"></span>, CP: <span id="playerCombatCP"></span> / <span id="playerCombatMaxCP"></span></p>
+                <p>Противник: <span id="enemyName"></span> (HP: <span id="enemyHP"></span> / <span id="enemyMaxHP"></span>)</p>
+                <div id="combatActions" class="combat-actions grid grid-cols-2 gap-2 mt-4">
+                    <button id="attackBtn">Атака (Тайдзюцу)</button>
+                    <button id="jutsuBtn">Использовать Дзюцу</button>
+                    <button id="defendBtn">Защита</button>
+                    <button id="itemBtn">Использовать Предмет</button>
+                </div>
+                <div id="jutsuSelection" class="hidden mt-4">
+                    <h4 class="text-lg mb-2 text-blue-200">Выбери Дзюцу:</h4>
+                    <div id="availableJutsuButtons" class="grid grid-cols-2 gap-2"></div>
+                    <button id="cancelJutsuBtn" class="mt-2">Отмена</button>
+                </div>
+            </div>
+
+            <!-- Inventory Display -->
+            <div id="inventoryDisplay" class="hidden">
+                <h3 class="text-xl mb-2 text-blue-300">Инвентарь</h3>
+                <ul id="inventoryList" class="mb-4"></ul>
+                <button id="useItemBtn" class="mb-2">Использовать Предмет</button>
+                <button id="equipItemBtn" class="mb-2">Экипировать Предмет</button>
+                <div id="inventoryMessageBox" class="message-box hidden"></div>
+            </div>
+
+            <!-- Training Display -->
+            <div id="trainingDisplay" class="hidden">
+                <h3 class="text-xl mb-2 text-blue-300">Обучение</h3>
+                <p>Здесь вы можете изучать новые дзюцу или улучшать характеристики.</p>
+                <button id="learnJutsuBtn" class="mb-2">Изучить Дзюцу</button>
+                <button id="improveStatsBtn" class="mb-2">Улучшить Характеристики</button>
+                <div id="trainingMessageBox" class="message-box hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== Telegram Mini Apps Integration ====================
+        const tg = window.Telegram.WebApp;
+        
+        // Инициализация Telegram Web App
+        tg.expand();
+        tg.enableClosingConfirmation();
+        
+        // Применяем тему Telegram
+        function applyTelegramTheme() {
+            document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color || '#1a202c');
+            document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color || '#e2e8f0');
+            document.documentElement.style.setProperty('--tg-theme-hint-color', tg.themeParams.hint_color || '#a0aec0');
+            document.documentElement.style.setProperty('--tg-theme-link-color', tg.themeParams.link_color || '#4299e1');
+            document.documentElement.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color || '#4299e1');
+            document.documentElement.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color || '#ffffff');
+            document.documentElement.style.setProperty('--tg-theme-secondary-bg-color', tg.themeParams.secondary_bg_color || '#2d3748');
+        }
+        
+        // Обработка событий Telegram
+        tg.BackButton.onClick(() => {
+            goBack();
+        });
+        
+        // Функция для навигации назад
+        function goBack() {
+            if (isCombatActive) {
+                endCombat("Вы сбежали из боя!");
+                return;
+            }
+            
+            hideAllDisplays();
+            gameOutput.classList.remove('hidden');
+            updateBackButton();
+        }
+        
+        // Показываем/скрываем кнопку "Назад"
+        function updateBackButton() {
+            if (gameOutput.classList.contains('hidden') || isCombatActive) {
+                tg.BackButton.show();
+            } else {
+                tg.BackButton.hide();
+            }
+        }
+        
+        // Инициализация кнопки "Назад" в интерфейсе
+        document.getElementById('tgBackButton').addEventListener('click', goBack);
+        
+        // Сохранение данных игры
+        function saveGameData() {
+            if (player) {
+                const gameData = {
+                    player: player,
+                    currentMission: currentMission,
+                    currentEnemy: currentEnemy,
+                    isCombatActive: isCombatActive
+                };
+                
+                localStorage.setItem('narutoGameData', JSON.stringify(gameData));
+                tg.HapticFeedback.notificationOccurred('success');
+                showTelegramNotification("Игра сохранена!");
+            }
+        }
+        
+        // Загрузка данных игры
+        function loadGameData() {
+            const savedData = localStorage.getItem('narutoGameData');
+            if (savedData) {
+                try {
+                    const gameData = JSON.parse(savedData);
+                    player = gameData.player;
+                    currentMission = gameData.currentMission;
+                    currentEnemy = gameData.currentEnemy;
+                    isCombatActive = gameData.isCombatActive;
+                    
+                    charCreationSection.classList.add('hidden');
+                    gameInterfaceSection.classList.remove('hidden');
+                    gameOutput.textContent = `Добро пожаловать обратно, ${player.name}!`;
+                    
+                    if (isCombatActive) {
+                        startCombat();
+                    } else {
+                        updateProfileDisplay();
+                    }
+                    
+                    return true;
+                } catch (e) {
+                    console.error("Ошибка загрузки данных:", e);
+                }
+            }
+            return false;
+        }
+        
+        // Показ уведомления в Telegram
+        function showTelegramNotification(message) {
+            if (tg.showAlert) {
+                tg.showAlert(message);
+            } else {
+                alert(message);
+            }
+        }
+        
+        // ==================== Game Logic ====================
+        // Глобальные переменные для состояния игры
+        let player = null;
+        let totalPoints = 10;
+        let pointsSpent = 0;
+        let currentEnemy = null;
+        let isCombatActive = false;
+        let currentMission = null;
+        
+        // Элементы DOM
+        const charCreationSection = document.getElementById('characterCreation');
+        const gameInterfaceSection = document.getElementById('gameInterface');
+        const characterForm = document.getElementById('characterForm');
+        const charNameInput = document.getElementById('charName');
+        const charVillageSelect = document.getElementById('charVillage');
+        const charChakraElementSelect = document.getElementById('charChakraElement');
+        const charAppearanceInput = document.getElementById('charAppearance');
+        const remainingPointsSpan = document.getElementById('remainingPoints');
+        const createCharBtn = document.getElementById('createCharBtn');
+        const messageBox = document.getElementById('messageBox');
+        const tgSaveButton = document.getElementById('tgSaveButton');
+        
+        // Статистические поля ввода
+        const statInputs = {
+            Strength: document.getElementById('statStrength'),
+            Agility: document.getElementById('statAgility'),
+            Stamina: document.getElementById('statStamina'),
+            Chakra: document.getElementById('statChakra'),
+            Intellect: document.getElementById('statIntellect')
+        };
+        
+        // Кнопки управления статистикой
+        document.querySelectorAll('.add-stat-btn').forEach(button => {
+            button.addEventListener('click', (e) => adjustStat(e.target.dataset.stat, 1));
+        });
+        document.querySelectorAll('.remove-stat-btn').forEach(button => {
+            button.addEventListener('click', (e) => adjustStat(e.target.dataset.stat, -1));
+        });
+        
+        // Кнопки основного интерфейса
+        const showProfileBtn = document.getElementById('showProfileBtn');
+        const showMissionsBtn = document.getElementById('showMissionsBtn');
+        const showInventoryBtn = document.getElementById('showInventoryBtn');
+        const showTrainingBtn = document.getElementById('showTrainingBtn');
+        
+        // Области отображения
+        const gameOutput = document.getElementById('gameOutput');
+        const profileDisplay = document.getElementById('profileDisplay');
+        const missionsDisplay = document.getElementById('missionsDisplay');
+        const combatDisplay = document.getElementById('combatDisplay');
+        const inventoryDisplay = document.getElementById('inventoryDisplay');
+        const trainingDisplay = document.getElementById('trainingDisplay');
+        
+        // Элементы профиля
+        const profileName = document.getElementById('profileName');
+        const profileVillage = document.getElementById('profileVillage');
+        const profileElement = document.getElementById('profileElement');
+        const profileLevel = document.getElementById('profileLevel');
+        const profileExp = document.getElementById('profileExp');
+        const profileExpToNextLevel = document.getElementById('profileExpToNextLevel');
+        const profileHP = document.getElementById('profileHP');
+        const profileMaxHP = document.getElementById('profileMaxHP');
+        const profileCP = document.getElementById('profileCP');
+        const profileMaxCP = document.getElementById('profileMaxCP');
+        const profileStrength = document.getElementById('profileStrength');
+        const profileAgility = document.getElementById('profileAgility');
+        const profileStamina = document.getElementById('profileStamina');
+        const profileChakra = document.getElementById('profileChakra');
+        const profileIntellect = document.getElementById('profileIntellect');
+        const profileAppearance = document.getElementById('profileAppearance');
+        const profileJutsuList = document.getElementById('profileJutsuList');
+        const profileEquipmentList = document.getElementById('profileEquipmentList');
+        
+        // Элементы миссий
+        const missionList = document.getElementById('missionList');
+        const takeMissionBtn = document.getElementById('takeMissionBtn');
+        const completeMissionBtn = document.getElementById('completeMissionBtn');
+        const missionMessageBox = document.getElementById('missionMessageBox');
+        
+        // Элементы боя
+        const combatLog = document.getElementById('combatLog');
+        const playerCombatHP = document.getElementById('playerCombatHP');
+        const playerCombatMaxHP = document.getElementById('playerCombatMaxHP');
+        const playerCombatCP = document.getElementById('playerCombatCP');
+        const playerCombatMaxCP = document.getElementById('playerCombatMaxCP');
+        const enemyName = document.getElementById('enemyName');
+        const enemyHP = document.getElementById('enemyHP');
+        const enemyMaxHP = document.getElementById('enemyMaxHP');
+        const combatActions = document.getElementById('combatActions');
+        const attackBtn = document.getElementById('attackBtn');
+        const jutsuBtn = document.getElementById('jutsuBtn');
+        const defendBtn = document.getElementById('defendBtn');
+        const itemBtn = document.getElementById('itemBtn');
+        const jutsuSelection = document.getElementById('jutsuSelection');
+        const availableJutsuButtons = document.getElementById('availableJutsuButtons');
+        const cancelJutsuBtn = document.getElementById('cancelJutsuBtn');
+        
+        // Элементы инвентаря
+        const inventoryList = document.getElementById('inventoryList');
+        const useItemBtn = document.getElementById('useItemBtn');
+        const equipItemBtn = document.getElementById('equipItemBtn');
+        const inventoryMessageBox = document.getElementById('inventoryMessageBox');
+        
+        // Элементы обучения
+        const learnJutsuBtn = document.getElementById('learnJutsuBtn');
+        const improveStatsBtn = document.getElementById('improveStatsBtn');
+        const trainingMessageBox = document.getElementById('trainingMessageBox');
+        
+        // --- Игровые данные (для симуляции) ---
+        const missions = [
+            { id: 'm1', name: 'Сопровождение торговца', rank: 'D', description: 'Тебе поручено сопроводить торговца из Конохи в соседнюю деревню, защищая его от мелких бандитов.', rewardExp: 500, rewardRyo: 200, enemy: { name: 'Бандит', hp: 80, strength: 10, agility: 5, expReward: 100 } },
+            { id: 'm2', name: 'Охота на диких зверей', rank: 'D', description: 'Очистить лес от агрессивных диких зверей.', rewardExp: 600, rewardRyo: 250, enemy: { name: 'Дикий Волк', hp: 90, strength: 12, agility: 8, expReward: 120 } },
+            { id: 'm3', name: 'Поиск пропавшего свитка', rank: 'C', description: 'Найти свиток, украденный ниндзя-отступником.', rewardExp: 1200, rewardRyo: 500, enemy: { name: 'Ниндзя-отступник', hp: 150, strength: 18, agility: 12, expReward: 250 } }
+        ];
+        
+        const jutsuData = {
+            'Огонь': [{ name: 'Огненный Шар', cost: 15, damageMultiplier: 1.5 }],
+            'Вода': [{ name: 'Водяной Дракон', cost: 20, damageMultiplier: 1.7 }],
+            'Ветер': [{ name: 'Ветряной Порез', cost: 12, damageMultiplier: 1.3 }],
+            'Молния': [{ name: 'Чидори (базовое)', cost: 25, damageMultiplier: 2.0 }],
+            'Земля': [{ name: 'Каменная Стена', cost: 10, defenseBonus: 0.5 }],
+            'Тайдзюцу': [{ name: 'Листковая Ловкость', cost: 0, damageMultiplier: 1.0 }],
+            'Гендзюцу': [{ name: 'Иллюзия: Замешательство', cost: 10, effect: 'stun', duration: 1 }]
+        };
+        
+        const itemsData = [
+            { id: 'hp_potion', name: 'Малое зелье здоровья', type: 'consumable', effect: { type: 'heal', value: 30 } },
+            { id: 'cp_potion', name: 'Малое зелье чакры', type: 'consumable', effect: { type: 'restore_cp', value: 20 } },
+            { id: 'kunai', name: 'Кунай', type: 'weapon', attackBonus: 5 },
+            { id: 'shinobi_vest', name: 'Жилет шиноби', type: 'armor', defenseBonus: 3 }
+        ];
+        
+        // --- Функции игры ---
+        
+        // Обновление отображения оставшихся очков
+        function updateRemainingPoints() {
+            pointsSpent = parseInt(statInputs.Strength.value) +
+                          parseInt(statInputs.Agility.value) +
+                          parseInt(statInputs.Stamina.value) +
+                          parseInt(statInputs.Chakra.value) +
+                          parseInt(statInputs.Intellect.value);
+            remainingPointsSpan.textContent = `Осталось очков: ${totalPoints - pointsSpent}`;
+            createCharBtn.disabled = (totalPoints - pointsSpent !== 0);
+        }
+        
+        // Регулировка характеристик при создании персонажа
+        function adjustStat(statName, change) {
+            let currentValue = parseInt(statInputs[statName].value);
+            let newTotal = pointsSpent + change;
+            
+            if (change > 0) {
+                if (newTotal <= totalPoints) {
+                    statInputs[statName].value = currentValue + 1;
+                } else {
+                    showMessage("Недостаточно очков!", true);
+                }
+            } else {
+                if (currentValue > 0) {
+                    statInputs[statName].value = currentValue - 1;
+                } else {
+                    showMessage("Нельзя уменьшить ниже нуля!", true);
+                }
+            }
+            updateRemainingPoints();
+        }
+        
+        // Показать сообщение
+        function showMessage(msg, isError = false) {
+            if (tg.showAlert) {
+                tg.showAlert(msg);
+            } else {
+                messageBox.textContent = msg;
+                messageBox.classList.remove('hidden');
+                if (isError) {
+                    messageBox.style.backgroundColor = '#c53030';
+                } else {
+                    messageBox.style.backgroundColor = '#2c5282';
+                }
+                setTimeout(() => {
+                    messageBox.classList.add('hidden');
+                }, 3000);
+            }
+        }
+        
+        // Создание персонажа
+        characterForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            if (totalPoints - pointsSpent !== 0) {
+                showMessage("Распределите все 10 очков характеристик!", true);
+                return;
+            }
+            
+            player = {
+                name: charNameInput.value,
+                village: charVillageSelect.value,
+                chakraElement: charChakraElementSelect.value,
+                appearance: charAppearanceInput.value || 'Обычная внешность шиноби.',
+                level: 1,
+                exp: 0,
+                expToNextLevel: 1000,
+                stats: {
+                    strength: parseInt(statInputs.Strength.value),
+                    agility: parseInt(statInputs.Agility.value),
+                    stamina: parseInt(statInputs.Stamina.value),
+                    chakra: parseInt(statInputs.Chakra.value),
+                    intellect: parseInt(statInputs.Intellect.value)
+                },
+                hp: 0,
+                maxHp: 0,
+                cp: 0,
+                maxCp: 0,
+                jutsu: [],
+                inventory: [],
+                equipment: {
+                    weapon: null,
+                    armor: null,
+                    accessory: null
+                },
+                ryo: 500
+            };
+            
+            // Расчет характеристик
+            player.maxHp = 100 + (player.stats.stamina * 10);
+            player.hp = player.maxHp;
+            player.maxCp = 50 + (player.stats.chakra * 5);
+            player.cp = player.maxCp;
+            
+            // Добавление начального дзюцу
+            player.jutsu.push(jutsuData.Тайдзюцу[0]);
+            if (jutsuData[player.chakraElement] && jutsuData[player.chakraElement][0]) {
+                player.jutsu.push(jutsuData[player.chakraElement][0]);
+            }
+            
+            // Добавление стартовых предметов
+            player.inventory.push(itemsData.find(item => item.id === 'hp_potion'));
+            player.inventory.push(itemsData.find(item => item.id === 'kunai'));
+            player.inventory.push(itemsData.find(item => item.id === 'shinobi_vest'));
+            
+            // Экипировка стартового снаряжения
+            player.equipment.weapon = itemsData.find(item => item.id === 'kunai');
+            player.equipment.armor = itemsData.find(item => item.id === 'shinobi_vest');
+            
+            charCreationSection.classList.add('hidden');
+            gameInterfaceSection.classList.remove('hidden');
+            gameOutput.textContent = `Добро пожаловать, ${player.name} из ${player.village}! Твой путь шиноби начинается!`;
+            
+            saveGameData();
+            updateProfileDisplay();
+            updateBackButton();
+        });
+        
+        // --- Функции отображения игрового интерфейса ---
+        
+        // Скрыть все игровые дисплеи
+        function hideAllDisplays() {
+            profileDisplay.classList.add('hidden');
+            missionsDisplay.classList.add('hidden');
+            combatDisplay.classList.add('hidden');
+            inventoryDisplay.classList.add('hidden');
+            trainingDisplay.classList.add('hidden');
+            gameOutput.classList.remove('hidden');
+        }
+        
+        // Показать профиль
+        showProfileBtn.addEventListener('click', () => {
+            hideAllDisplays();
+            profileDisplay.classList.remove('hidden');
+            updateProfileDisplay();
+            gameOutput.classList.add('hidden');
+            updateBackButton();
+        });
+        
+        function updateProfileDisplay() {
+            if (!player) return;
+            
+            profileName.textContent = player.name;
+            profileVillage.textContent = player.village;
+            profileElement.textContent = player.chakraElement;
+            profileLevel.textContent = player.level;
+            profileExp.textContent = player.exp;
+            profileExpToNextLevel.textContent = player.expToNextLevel;
+            profileHP.textContent = player.hp;
+            profileMaxHP.textContent = player.maxHp;
+            profileCP.textContent = player.cp;
+            profileMaxCP.textContent = player.maxCp;
+            profileStrength.textContent = player.stats.strength;
+            profileAgility.textContent = player.stats.agility;
+            profileStamina.textContent = player.stats.stamina;
+            profileChakra.textContent = player.stats.chakra;
+            profileIntellect.textContent = player.stats.intellect;
+            profileAppearance.textContent = player.appearance;
+            
+            profileJutsuList.innerHTML = '';
+            if (player.jutsu.length === 0) {
+                profileJutsuList.innerHTML = '<li>Нет изученных дзюцу.</li>';
+            } else {
+                player.jutsu.forEach(j => {
+                    const li = document.createElement('li');
+                    li.textContent = `${j.name} (Стоимость: ${j.cost || 0} CP)`;
+                    profileJutsuList.appendChild(li);
+                });
+            }
+            
+            profileEquipmentList.innerHTML = '';
+            if (!player.equipment.weapon && !player.equipment.armor && !player.equipment.accessory) {
+                profileEquipmentList.innerHTML = '<li>Ничего не экипировано.</li>';
+            } else {
+                if (player.equipment.weapon) {
+                    const li = document.createElement('li');
+                    li.textContent = `Оружие: ${player.equipment.weapon.name} (Атака: +${player.equipment.weapon.attackBonus || 0})`;
+                    profileEquipmentList.appendChild(li);
+                }
+                if (player.equipment.armor) {
+                    const li = document.createElement('li');
+                    li.textContent = `Броня: ${player.equipment.armor.name} (Защита: +${player.equipment.armor.defenseBonus || 0})`;
+                    profileEquipmentList.appendChild(li);
+                }
+                if (player.equipment.accessory) {
+                    const li = document.createElement('li');
+                    li.textContent = `Аксессуар: ${player.equipment.accessory.name}`;
+                    profileEquipmentList.appendChild(li);
+                }
+            }
+        }
+        
+        // Показать миссии
+        showMissionsBtn.addEventListener('click', () => {
+            hideAllDisplays();
+            missionsDisplay.classList.remove('hidden');
+            gameOutput.classList.add('hidden');
+            loadMissions();
+            updateBackButton();
+        });
+        
+        function loadMissions() {
+            missionList.innerHTML = '';
+            missions.forEach(mission => {
+                const li = document.createElement('li');
+                li.innerHTML = `<input type="radio" name="selectedMission" value="${mission.id}" id="mission-${mission.id}">
+                                <label for="mission-${mission.id}"><strong>[Ранг ${mission.rank}] ${mission.name}</strong>: ${mission.description}</label>`;
+                missionList.appendChild(li);
+            });
+            takeMissionBtn.classList.remove('hidden');
+            completeMissionBtn.classList.add('hidden');
+            missionMessageBox.classList.add('hidden');
+        }
+        
+        // Взять миссию
+        takeMissionBtn.addEventListener('click', () => {
+            const selectedMissionId = document.querySelector('input[name="selectedMission"]:checked')?.value;
+            if (selectedMissionId) {
+                currentMission = missions.find(m => m.id === selectedMissionId);
+                gameOutput.textContent = `Ты взял миссию: "${currentMission.name}". ${currentMission.description}`;
+                hideAllDisplays();
+                gameOutput.classList.remove('hidden');
+                startMissionEncounter();
+            } else {
+                missionMessageBox.textContent = 'Пожалуйста, выберите миссию.';
+                missionMessageBox.classList.remove('hidden');
+            }
+        });
+        
+        // Начало симуляции миссии
+        function startMissionEncounter() {
+            if (currentMission && currentMission.enemy) {
+                currentEnemy = { ...currentMission.enemy };
+                currentEnemy.currentHp = currentEnemy.hp;
+                startCombat();
+            } else {
+                gameOutput.textContent += '\nМиссия выполнена! Возвращайся в деревню, чтобы сдать её.';
+                completeMissionBtn.classList.remove('hidden');
+                takeMissionBtn.classList.add('hidden');
+            }
+        }
+        
+        // Сдать миссию
+        completeMissionBtn.addEventListener('click', () => {
+            if (currentMission) {
+                player.exp += currentMission.rewardExp;
+                player.ryo += currentMission.rewardRyo;
+                gameOutput.textContent = `Миссия "${currentMission.name}" сдана! Ты получил ${currentMission.rewardExp} опыта и ${currentMission.rewardRyo} рё.`;
+                checkLevelUp();
+                currentMission = null;
+                completeMissionBtn.classList.add('hidden');
+                takeMissionBtn.classList.remove('hidden');
+                updateProfileDisplay();
+                saveGameData();
+            }
+        });
+        
+        // Проверка повышения уровня
+        function checkLevelUp() {
+            while (player.exp >= player.expToNextLevel) {
+                player.level++;
+                player.exp -= player.expToNextLevel;
+                player.expToNextLevel = Math.floor(player.expToNextLevel * 1.5);
+                player.maxHp += 10;
+                player.hp = player.maxHp;
+                player.maxCp += 5;
+                player.cp = player.maxCp;
+                gameOutput.textContent += `\nПоздравляем! Ты достиг ${player.level} уровня! Твои HP и CP восстановлены.`;
+                saveGameData();
+            }
+        }
+        
+        // --- Боевая система ---
+        
+        function startCombat() {
+            isCombatActive = true;
+            hideAllDisplays();
+            combatDisplay.classList.remove('hidden');
+            combatLog.textContent = `Ты столкнулся с ${currentEnemy.name}!\n`;
+            tg.BackButton.setText("Сбежать");
+            updateBackButton();
+            updateCombatDisplay();
+        }
+        
+        function updateCombatDisplay() {
+            playerCombatHP.textContent = player.hp;
+            playerCombatMaxHP.textContent = player.maxHp;
+            playerCombatCP.textContent = player.cp;
+            playerCombatMaxCP.textContent = player.maxCp;
+            enemyName.textContent = currentEnemy.name;
+            enemyHP.textContent = currentEnemy.currentHp;
+            enemyMaxHP.textContent = currentEnemy.hp;
+            
+            combatActions.classList.remove('hidden');
+            jutsuSelection.classList.add('hidden');
+        }
+        
+        function endCombat(outcome) {
+            isCombatActive = false;
+            currentEnemy = null;
+            combatLog.textContent += `\nБой завершен. ${outcome}\n`;
+            gameOutput.textContent = combatLog.textContent;
+            hideAllDisplays();
+            gameOutput.classList.remove('hidden');
+            tg.BackButton.setText("Назад");
+            updateBackButton();
+            
+            if (outcome.includes("победил")) {
+                gameOutput.textContent += '\nМиссия выполнена! Возвращайся в деревню, чтобы сдать её.';
+                completeMissionBtn.classList.remove('hidden');
+                takeMissionBtn.classList.add('hidden');
+            } else {
+                gameOutput.textContent += '\nТы потерпел поражение и вернулся в деревню. Попробуй еще раз!';
+                player.hp = player.maxHp;
+                player.cp = player.maxCp;
+                updateProfileDisplay();
+                completeMissionBtn.classList.add('hidden');
+                takeMissionBtn.classList.remove('hidden');
+            }
+            saveGameData();
+        }
+        
+        // Ход игрока
+        attackBtn.addEventListener('click', () => playerTurn('attack'));
+        defendBtn.addEventListener('click', () => playerTurn('defend'));
+        itemBtn.addEventListener('click', () => playerTurn('item'));
+        
+        jutsuBtn.addEventListener('click', () => {
+            combatActions.classList.add('hidden');
+            jutsuSelection.classList.remove('hidden');
+            availableJutsuButtons.innerHTML = '';
+            player.jutsu.forEach(j => {
+                const btn = document.createElement('button');
+                btn.textContent = `${j.name} (${j.cost || 0} CP)`;
+                btn.classList.add('jutsu-select-btn');
+                btn.disabled = player.cp < (j.cost || 0);
+                btn.addEventListener('click', () => playerTurn('jutsu', j));
+                availableJutsuButtons.appendChild(btn);
+            });
+        });
+        
+        cancelJutsuBtn.addEventListener('click', () => {
+            jutsuSelection.classList.add('hidden');
+            combatActions.classList.remove('hidden');
+        });
+        
+        async function playerTurn(action, jutsu = null) {
+            if (!isCombatActive) return;
+            
+            let playerDamage = 0;
+            let logMessage = '';
+            
+            switch (action) {
+                case 'attack':
+                    playerDamage = player.stats.strength * (1 + (player.equipment.weapon?.attackBonus || 0) / 10);
+                    playerDamage = Math.max(1, Math.floor(playerDamage * (1 + Math.random() * 0.2 - 0.1)));
+                    currentEnemy.currentHp -= playerDamage;
+                    logMessage = `Ты атакуешь ${currentEnemy.name} и наносишь ${playerDamage.toFixed(0)} урона!`;
+                    break;
+                case 'jutsu':
+                    if (!jutsu) {
+                        logMessage = 'Ошибка: Дзюцу не выбрано.';
+                        break;
+                    }
+                    if (player.cp < jutsu.cost) {
+                        logMessage = 'Недостаточно чакры для этого дзюцу!';
+                        break;
+                    }
+                    player.cp -= jutsu.cost;
+                    if (jutsu.damageMultiplier) {
+                        playerDamage = (player.stats.intellect * jutsu.damageMultiplier) * (1 + Math.random() * 0.2 - 0.1);
+                        playerDamage = Math.max(1, Math.floor(playerDamage));
+                        currentEnemy.currentHp -= playerDamage;
+                        logMessage = `Ты используешь ${jutsu.name} и наносишь ${playerDamage.toFixed(0)} урона!`;
+                    } else if (jutsu.effect === 'stun') {
+                        logMessage = `Ты используешь ${jutsu.name} и оглушаешь ${currentEnemy.name} на ${jutsu.duration} ход!`;
+                    } else if (jutsu.defenseBonus) {
+                        logMessage = `Ты используешь ${jutsu.name} и увеличиваешь свою защиту!`;
+                    }
+                    break;
+                case 'defend':
+                    logMessage = 'Ты принимаешь защитную стойку.';
+                    break;
+                case 'item':
+                    logMessage = 'Использование предметов пока не полностью реализовано в бою.';
+                    break;
+            }
+            
+            combatLog.textContent += `\n${logMessage}`;
+            updateCombatDisplay();
+            
+            if (currentEnemy.currentHp <= 0) {
+                endCombat(`Ты победил ${currentEnemy.name}! Ты получил ${currentEnemy.expReward} опыта.`);
+                player.exp += currentEnemy.expReward;
+                checkLevelUp();
+                updateProfileDisplay();
+                return;
+            }
+            
+            // Ход противника
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            enemyTurn();
+        }
+        
+        function enemyTurn() {
+            if (!isCombatActive) return;
+            
+            let enemyDamage = currentEnemy.strength * (1 + Math.random() * 0.2 - 0.1);
+            enemyDamage = Math.max(1, Math.floor(enemyDamage));
+            player.hp -= enemyDamage;
+            combatLog.textContent += `\n${currentEnemy.name} атакует тебя и наносит ${enemyDamage.toFixed(0)} урона!`;
+            updateCombatDisplay();
+            
+            if (player.hp <= 0) {
+                endCombat('Ты потерпел поражение...');
+                return;
+            }
+        }
+        
+        // --- Инвентарь ---
+        showInventoryBtn.addEventListener('click', () => {
+            hideAllDisplays();
+            inventoryDisplay.classList.remove('hidden');
+            gameOutput.classList.add('hidden');
+            updateInventoryDisplay();
+            updateBackButton();
+        });
+        
+        function updateInventoryDisplay() {
+            inventoryList.innerHTML = '';
+            if (player.inventory.length === 0) {
+                inventoryList.innerHTML = '<li>Инвентарь пуст.</li>';
+            } else {
+                player.inventory.forEach((item, index) => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<input type="radio" name="selectedItem" value="${index}" id="item-${index}">
+                                    <label for="item-${index}">${item.name} (${item.type})</label>`;
+                    inventoryList.appendChild(li);
+                });
+            }
+            inventoryMessageBox.classList.add('hidden');
+        }
+        
+        useItemBtn.addEventListener('click', () => {
+            const selectedItemIndex = document.querySelector('input[name="selectedItem"]:checked')?.value;
+            if (selectedItemIndex !== undefined) {
+                const item = player.inventory[selectedItemIndex];
+                if (item.type === 'consumable') {
+                    if (item.effect.type === 'heal') {
+                        player.hp = Math.min(player.maxHp, player.hp + item.effect.value);
+                        inventoryMessageBox.textContent = `Ты использовал ${item.name} и восстановил ${item.effect.value} HP!`;
+                    } else if (item.effect.type === 'restore_cp') {
+                        player.cp = Math.min(player.maxCp, player.cp + item.effect.value);
+                        inventoryMessageBox.textContent = `Ты использовал ${item.name} и восстановил ${item.effect.value} CP!`;
+                    }
+                    player.inventory.splice(selectedItemIndex, 1);
+                    inventoryMessageBox.classList.remove('hidden');
+                    updateInventoryDisplay();
+                    updateProfileDisplay();
+                    saveGameData();
+                } else {
+                    inventoryMessageBox.textContent = 'Этот предмет нельзя использовать таким образом.';
+                    inventoryMessageBox.classList.remove('hidden');
+                }
+            } else {
+                inventoryMessageBox.textContent = 'Выберите предмет для использования.';
+                inventoryMessageBox.classList.remove('hidden');
+            }
+        });
+        
+        equipItemBtn.addEventListener('click', () => {
+            const selectedItemIndex = document.querySelector('input[name="selectedItem"]:checked')?.value;
+            if (selectedItemIndex !== undefined) {
+                const item = player.inventory[selectedItemIndex];
+                if (item.type === 'weapon' || item.type === 'armor' || item.type === 'accessory') {
+                    if (player.equipment[item.type]) {
+                        player.inventory.push(player.equipment[item.type]);
+                    }
+                    player.equipment[item.type] = item;
+                    player.inventory.splice(selectedItemIndex, 1);
+                    inventoryMessageBox.textContent = `Ты экипировал ${item.name}!`;
+                    inventoryMessageBox.classList.remove('hidden');
+                    updateInventoryDisplay();
+                    updateProfileDisplay();
+                    saveGameData();
+                } else {
+                    inventoryMessageBox.textContent = 'Этот предмет нельзя экипировать.';
+                    inventoryMessageBox.classList.remove('hidden');
+                }
+            } else {
+                inventoryMessageBox.textContent = 'Выберите предмет для экипировки.';
+                inventoryMessageBox.classList.remove('hidden');
+            }
+        });
+        
+        // --- Обучение ---
+        showTrainingBtn.addEventListener('click', () => {
+            hideAllDisplays();
+            trainingDisplay.classList.remove('hidden');
+            gameOutput.classList.add('hidden');
+            updateBackButton();
+        });
+        
+        learnJutsuBtn.addEventListener('click', () => {
+            trainingMessageBox.textContent = 'Изучение дзюцу пока не реализовано. В будущем здесь будет список доступных дзюцу и условия их изучения.';
+            trainingMessageBox.classList.remove('hidden');
+        });
+        
+        improveStatsBtn.addEventListener('click', () => {
+            trainingMessageBox.textContent = 'Улучшение характеристик пока не реализовано. В будущем здесь можно будет распределять очки, полученные за уровень.';
+            trainingMessageBox.classList.remove('hidden');
+        });
+        
+        // ==================== Инициализация при загрузке ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            // Применяем тему Telegram
+            applyTelegramTheme();
+            
+            // Пытаемся загрузить сохраненную игру
+            if (!loadGameData()) {
+                // Инициализация новой игры
+                updateRemainingPoints();
+            }
+            
+            // Инициализация кнопки "Назад"
+            updateBackButton();
+            
+            // Кнопка сохранения
+            tgSaveButton.addEventListener('click', saveGameData);
+            
+            // Автосохранение при закрытии
+            window.addEventListener('beforeunload', () => {
+                saveGameData();
+            });
+        });
+    </script>
+</body>
+</html>
